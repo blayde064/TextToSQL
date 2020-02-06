@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TextToSQL"
         mc:Ignorable="d"
-        Title="Text to SQL" Height="411.005" Width="801.95">
+        Title="Text to SQL" Height="411.005" Width="801.95" Loaded="Window_Loaded">
     <Grid Background="#FFCCFFFD">
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -31,7 +31,20 @@
                 <RichTextBox x:Name="rtbQuery" Margin="0,32,-2,1" FontSize="12" FontWeight="Normal" TextChanged="RtbQuery_TextChanged" BorderBrush="Black">
                     <FlowDocument/>
                 </RichTextBox>
-                <TextBox x:Name="tbDatabase" HorizontalAlignment="Left" Height="23" Margin="81,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="147" FontSize="12" FontWeight="Normal" BorderBrush="Black"/>
+                <Label Content="Type:" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="45" Margin="351,0,0,0"/>
+                <ComboBox x:Name="cbType" Margin="396,4,0,0" VerticalAlignment="Top" BorderBrush="White" SelectionChanged="ComboBox_SelectionChanged">
+                    <ComboBox.Background>
+                        <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
+                            <GradientStop Color="#FFF0F0F0" Offset="0"/>
+                            <GradientStop Color="White" Offset="1"/>
+                        </LinearGradientBrush>
+                    </ComboBox.Background>
+                    <ComboBoxItem Content="Insert/Update"/>
+                    <ComboBoxItem Content="Select"/>
+                </ComboBox>
+                <Label x:Name="txtRows" Content="Columns:" Height="25" VerticalAlignment="Top" HorizontalAlignment="Left" Width="76" Margin="217,0,0,0" Visibility="Hidden"/>
+                <TextBox x:Name="tbRows" HorizontalAlignment="Left" Height="23" Margin="284,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="67" FontSize="12" FontWeight="Normal" BorderBrush="Black" Visibility="Hidden"/>
+                <ComboBox x:Name="cbDatabase" HorizontalAlignment="Left" Margin="76,4,0,0" VerticalAlignment="Top" Width="120"/>
             </Grid>
         </GroupBox>
         <Label x:Name="lblFilePath" Content="&#xD;&#xA;" Margin="10,325,417,10"/>

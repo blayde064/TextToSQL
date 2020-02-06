@@ -75,7 +75,9 @@ namespace TextToSQL
                             {
                                 Database = reader["Data_Base"].ToString(),
                                 Query = reader["Query"].ToString(),
-                                Parameters = reader["Parameters"].ToString()
+                                Parameters = reader["Parameters"].ToString(),
+                                Select = (reader["IsSelect"] as bool?) ?? false,
+                                Rows = (reader["NumberOfColumns"] ?? "").ToString()
                             });
                         }
                     }

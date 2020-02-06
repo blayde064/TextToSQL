@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
@@ -31,6 +32,7 @@ namespace TextToSQL
         string currFileName = "";
         string selectedFile = "";
         string currDateTime = "";
+        public bool bSelect = false;
 
         public string SqlServerName { get; }
 
@@ -186,36 +188,93 @@ namespace TextToSQL
 
         private void Button1_Click(object sender, RoutedEventArgs e)
         {
-            rtbOutput.AppendText(">> Connection string: Data Source =" + SqlServerName + "; Initial Catalog = " + tbDatabase.Text + "; Persist Security Info = True; User ID = inhouse; Password = Password1\n");
-            WriteToTxt(">> Connection string: Data Source =" + SqlServerName + "; Initial Catalog = " + tbDatabase.Text + "; Persist Security Info = True; User ID = inhouse; Password = Password1\n");
+            if (currFileName.Equals(""))
+            {
+                MessageBox.Show("Please Select a File!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            rtbOutput.AppendText(">> Connection string: Data Source =" + SqlServerName + "; Initial Catalog = " + cbDatabase.Text + "; Persist Security Info = True; User ID = inhouse; Password = Password1\n");
+            WriteToTxt(">> Connection string: Data Source =" + SqlServerName + "; Initial Catalog = " + cbDatabase.Text + "; Persist Security Info = True; User ID = inhouse; Password = Password1\n");
             for (int i = 0; i < items.Count; i++)
             {
-                using (SqlConnection conn = new SqlConnection("Data Source =" + SqlServerName + "; Initial Catalog = " + tbDatabase.Text + "; Persist Security Info = True; User ID = inhouse; Password = Password1"))
+                if (!bSelect)
                 {
-                    using (SqlCommand cmd = new SqlCommand(new TextRange(rtbQuery.Document.ContentStart, rtbQuery.Document.ContentEnd).Text, conn))
+                    using (SqlConnection conn = new SqlConnection("Data Source =" + SqlServerName + "; Initial Catalog = " + cbDatabase.Text + "; Persist Security Info = True; User ID = inhouse; Password = Password1"))
                     {
-                        string command = new TextRange(rtbQuery.Document.ContentStart, rtbQuery.Document.ContentEnd).Text;
+                        using (SqlCommand cmd = new SqlCommand(new TextRange(rtbQuery.Document.ContentStart, rtbQuery.Document.ContentEnd).Text, conn))
+                        {
+                            string command = new TextRange(rtbQuery.Document.ContentStart, rtbQuery.Document.ContentEnd).Text;
 
-                        for (int j = 0; j < param.Length; j++)
-                        {
-                            command = command.Replace(param[j], items[i][j]);
-                            cmd.Parameters.AddWithValue(param[j], items[i][j]);
-                        }
-                        rtbOutput.AppendText(">> Query: " + command + "\n");
-                        WriteToTxt(">> Query: " + command + "\n");
-                        try
-                        {
-                            conn.Open();
-                            int num = 0;
-                            num = cmd.ExecuteNonQuery();
-                            rtbOutput.AppendText(">> Rows Effected: " + num + "\n");
-                            WriteToTxt(">> Rows Effected: " + num + "\n");
-                            conn.Close();
-                        }
-                        catch (Exception ex) { 
-                            if (MessageBox.Show("Error! " + ex.Message + "\nWould you like to continue?", "ERROR", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.No)
+                            for (int j = 0; j < param.Length; j++)
                             {
-                                return;
+                                command = command.Replace(param[j], items[i][j]);
+                                cmd.Parameters.AddWithValue(param[j], items[i][j]);
+                            }
+                            rtbOutput.AppendText(">> Query: " + command + "\n");
+                            WriteToTxt(">> Query: " + command + "\n");
+                            try
+                            {
+                                conn.Open();
+                                int num = 0;
+                                num = cmd.ExecuteNonQuery();
+                                rtbOutput.AppendText(">> Rows Effected: " + num + "\n");
+                                WriteToTxt(">> Rows Effected: " + num + "\n");
+                                conn.Close();
+                            }
+                            catch (Exception ex)
+                            {
+                                if (MessageBox.Show("Error! " + ex.Message + "\nWould you like to continue?", "ERROR", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.No)
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    using (SqlConnection conn = new SqlConnection("Data Source =" + SqlServerName + "; Initial Catalog = " + cbDatabase.Text + "; Persist Security Info = True; User ID = inhouse; Password = Password1"))
+                    {
+                        using (SqlCommand cmd = new SqlCommand(new TextRange(rtbQuery.Document.ContentStart, rtbQuery.Document.ContentEnd).Text, conn))
+                        {
+                            string command = new TextRange(rtbQuery.Document.ContentStart, rtbQuery.Document.ContentEnd).Text;
+
+                            for (int j = 0; j < param.Length; j++)
+                            {
+                                command = command.Replace(param[j], items[i][j]);
+                                cmd.Parameters.AddWithValue(param[j], items[i][j]);
+                            }
+                            //rtbOutput.AppendText(">> Query: " + command + "\n");
+                            WriteToTxt(">> Query: " + command + "\n");
+                            try
+                            {
+                                conn.Open();
+                                using (SqlDataReader reader = cmd.ExecuteReader())
+                                {
+                                    int numrows = 0;
+                                    while (reader.Read())
+                                    {
+                                        numrows++;
+                                        string returned = "";
+                                        for (int zz = 0; zz < Int32.Parse(tbRows.Text); zz++) returned += (reader[zz] ?? "").ToString()+", ";
+                                        returned = returned.Remove(returned.Length - 2, 1);
+                                        rtbOutput.AppendText(">>  "+ items[i][0]+": " + returned+ "\n");
+                                        WriteToTxt(">>  " + items[i][0] + ": " + returned + "\n");
+                                    }
+                                    if (numrows == 0)
+                                    {
+                                        rtbOutput.AppendText(">>  " + items[i][0] + ": No Data Found!\n");
+                                        WriteToTxt(">>  " + items[i][0] + ": No Data Found\n");
+                                    }
+                                }
+                                conn.Close();
+                            }
+                            catch (Exception ex)
+                            {
+                                if (MessageBox.Show("Error! " + ex.Message + "\nWould you like to continue?", "ERROR", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.No)
+                                {
+                                    return;
+                                }
                             }
                         }
                     }
@@ -262,10 +321,25 @@ namespace TextToSQL
             new frmLoadQuery().ShowDialog();
             if(csHolder.selected != null)
             {
-                tbDatabase.Text = csHolder.selected.Database;
+                cbDatabase.SelectedItem = csHolder.selected.Database;
                 rtbQuery.Document.Blocks.Clear();
                 rtbQuery.AppendText(csHolder.selected.Query);
                 tbParams.Text = csHolder.selected.Parameters;
+                tbRows.Text = csHolder.selected.Rows;
+                bSelect = csHolder.selected.Select;
+
+                if (bSelect)
+                {
+                    txtRows.Visibility = Visibility.Visible;
+                    tbRows.Visibility = Visibility.Visible;
+                    cbType.SelectedIndex = 1;
+                }
+                else
+                {
+                    txtRows.Visibility = Visibility.Hidden;
+                    tbRows.Visibility = Visibility.Hidden;
+                    cbType.SelectedIndex = 0;
+                }
             }
         }
 
@@ -273,12 +347,14 @@ namespace TextToSQL
         {
             using (SqlConnection conn = new SqlConnection("Data Source =" + SqlServerName + "; Initial Catalog = EEPT; Persist Security Info = True; User ID = inhouse; Password = Password1"))
             {
-                using (SqlCommand cmd = new SqlCommand("INSERT INTO TextToSql_Queries VALUES(@query, @database, @parameters)", conn))
+                using (SqlCommand cmd = new SqlCommand("INSERT INTO TextToSql_Queries VALUES(@query, @database, @parameters, @type, @numRows)", conn))
                 {
                     conn.Open();
                     cmd.Parameters.AddWithValue("@query", new TextRange(rtbQuery.Document.ContentStart, rtbQuery.Document.ContentEnd).Text);
-                    cmd.Parameters.AddWithValue("@database", tbDatabase.Text);
+                    cmd.Parameters.AddWithValue("@database", cbDatabase.SelectedItem);
                     cmd.Parameters.AddWithValue("@parameters", tbParams.Text);
+                    cmd.Parameters.AddWithValue("@type", bSelect);
+                    cmd.Parameters.AddWithValue("@numRows", tbRows.Text);
                     cmd.ExecuteNonQuery();
                     conn.Close();
                 }
@@ -304,6 +380,62 @@ namespace TextToSQL
                 MessageBox.Show(string.Format("{0} Directory does not exist!", folderPath));
             }
         }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if((sender as ComboBox).SelectedIndex != -1)
+            {
+                int index = (sender as ComboBox).SelectedIndex;
+                if (index == 1)
+                {
+                    txtRows.Visibility = Visibility.Visible;
+                    tbRows.Visibility = Visibility.Visible;
+                    bSelect = true;
+                }
+                else
+                {
+                    txtRows.Visibility = Visibility.Hidden;
+                    tbRows.Visibility = Visibility.Hidden;
+                    bSelect = false;
+                }
+                
+            }
+        }
+
+        public List<string> GetDatabaseList()
+        {
+            List<string> list = new List<string>();
+
+            // Open connection to the database
+            string conString = "Data Source =" + SqlServerName + "; Persist Security Info = True; User ID = inhouse; Password = Password1";
+
+            using (SqlConnection con = new SqlConnection(conString))
+            {
+                con.Open();
+
+                // Set up a command with the given query and associate
+                // this with the current connection.
+                using (SqlCommand cmd = new SqlCommand("SELECT name from sys.databases ORDER BY name ASC", con))
+                {
+                    using (IDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            list.Add(dr[0].ToString());
+                        }
+                    }
+                }
+            }
+            return list;
+
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            cbDatabase.ItemsSource = GetDatabaseList();
+            cbDatabase.SelectedIndex = 0;
+            cbType.SelectedIndex = 0;
+        }
     }
 
     public class Saved
@@ -311,5 +443,7 @@ namespace TextToSQL
         public string Query { get; set; }
         public string Database { get; set; }
         public string Parameters { get; set; }
+        public bool Select { get; set; }
+        public string Rows { get; set; }
     }
 }
