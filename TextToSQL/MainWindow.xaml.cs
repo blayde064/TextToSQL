@@ -207,8 +207,8 @@ namespace TextToSQL
 
                             for (int j = 0; j < param.Length; j++)
                             {
-                                command = command.Replace(param[j], items[i][j]);
-                                cmd.Parameters.AddWithValue(param[j], items[i][j]);
+                                command = command.Replace(param[j], items[i][j].Trim().Replace("\t", ""));
+                                cmd.Parameters.AddWithValue(param[j], items[i][j].Trim().Replace("\t", ""));
                             }
                             rtbOutput.AppendText(">> Query: " + command + "\n");
                             WriteToTxt(">> Query: " + command + "\n");
