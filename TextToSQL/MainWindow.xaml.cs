@@ -71,7 +71,7 @@ namespace TextToSQL
         {
             try
             {
-                OpenFileDialog ofd = new OpenFileDialog() { Filter = "Text Files (*.txt) | *.txt;" };
+                OpenFileDialog ofd = new OpenFileDialog() { Filter = "Text Files (*.txt) | *.txt; Excel Files (*.xls, *.xlsx) | *.xls, *.xlsx;" };
                 ofd.ShowDialog();
                 if (string.IsNullOrWhiteSpace(ofd.FileName)) return;
 
@@ -83,48 +83,59 @@ namespace TextToSQL
                 rtbOutput.AppendText(">> Clearing items list... ");
                 items.Clear();
                 rtbOutput.AppendText(Environment.NewLine);
-                System.IO.StreamReader file = new System.IO.StreamReader(ofd.FileName);
-                string line;
-                while ((line = file.ReadLine()) != null)
+                if (ofd.FileName.Contains(".txt") || ofd.FileName.Contains(".csv"))
                 {
-                    bool isEmpty = string.IsNullOrWhiteSpace(tbParams.Text);
-                    List<string> numParams = line.Split(',').ToList();
-                    if (numParams.Count == 0)
+                    System.IO.StreamReader file = new System.IO.StreamReader(ofd.FileName);
+                    string line;
+                    while ((line = file.ReadLine()) != null)
                     {
-                        rtbOutput.AppendText(">> Skipping blank line...\n");
-                        WriteToTxt(">> Skipping blank line...\n");
-                    }
-                    else
-                    {
-                        if (isEmpty)
+                        bool isEmpty = string.IsNullOrWhiteSpace(tbParams.Text);
+                        List<string> numParams = line.Split(',').ToList();
+                        if (numParams.Count == 0)
                         {
-                            for (int i = 1; i <= numParams.Count; i++)
+                            rtbOutput.AppendText(">> Skipping blank line...\n");
+                            WriteToTxt(">> Skipping blank line...\n");
+                        }
+                        else
+                        {
+                            if (isEmpty)
                             {
+                                for (int i = 1; i <= numParams.Count; i++)
+                                {
 
-                                tbParams.Text += "@param" + i;
-                                if (i != numParams.Count) tbParams.Text += ",";
+                                    tbParams.Text += "@param" + i;
+                                    if (i != numParams.Count) tbParams.Text += ",";
 
+                                }
+                                rtbOutput.AppendText(">> " + param.Length + " paramater(s) detected!\n");
+                                WriteToTxt(">> " + param.Length + " paramater(s) detected!\n");
+                                rtbOutput.AppendText(">> Parameters: " + tbParams.Text + "\n");
+                                WriteToTxt(">> Parameters: " + tbParams.Text + "\n");
                             }
-                            rtbOutput.AppendText(">> " + param.Length + " paramater(s) detected!\n");
-                            WriteToTxt(">> " + param.Length + " paramater(s) detected!\n");
-                            rtbOutput.AppendText(">> Parameters: " + tbParams.Text + "\n");
-                            WriteToTxt(">> Parameters: " + tbParams.Text + "\n");
-                        }
-                        string message = "";
-                        message += ">> Adding ";
+                            string message = "";
+                            message += ">> Adding ";
 
-                        foreach (string s in numParams)
-                        {
-                            message += s + ", ";
-                        }
-                        message = message.Substring(0, message.Length - 2);
-                        rtbOutput.AppendText(message + "\n");
-                        WriteToTxt(message + "\n");
-                        items.Add(numParams);
+                            foreach (string s in numParams)
+                            {
+                                message += s + ", ";
+                            }
+                            message = message.Substring(0, message.Length - 2);
+                            rtbOutput.AppendText(message + "\n");
+                            WriteToTxt(message + "\n");
+                            items.Add(numParams);
 
+                        }
                     }
+                    file.Close();
                 }
-                file.Close();
+                else if (ofd.FileName.Contains(".xls") || ofd.FileName.Contains(".xlsx"))
+                {
+
+                }
+                else
+                {
+                    throw new Exception("File type not supported!");
+                }
             }
             catch (Exception ex)
             {

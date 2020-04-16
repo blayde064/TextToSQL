@@ -1,0 +1,23 @@
+﻿<Window x:Class="TextToSQL.frmGetExcelInfo"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TextToSQL"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
+        mc:Ignorable="d"
+        Title="frmGetExcelInfo" Height="203.808" Width="276.954">
+    <Grid>
+        <Label Content="Number of Rows:&#xD;&#xA;" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26"/>
+        <Label Content="Number of Columns:" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top"/>
+        <Label Content="Starting Row:" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top"/>
+        <Label Content="Starting Column:" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="tbNumRows" HorizontalAlignment="Left" Height="23" Margin="130,14,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="tbNumCols" HorizontalAlignment="Left" Height="23" Margin="130,45,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="tbStartRow" HorizontalAlignment="Left" Height="23" Margin="130,76,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="tbStartCol" HorizontalAlignment="Left" Height="23" Margin="130,107,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="175,135,0,0" VerticalAlignment="Top" Width="75"/>
+        <Image Height="100" Margin="0" Width="100" Source="pack://siteoforigin:,,,/Resources/loadGif.gif"/>
+
+    </Grid>
+</Window>
